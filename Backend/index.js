@@ -140,7 +140,7 @@ function clearLines() {
     }
 }
 
-function keyPress( key ) {
+app.post('/controller', function keyPress( request,response ) { // modificado 
     switch ( key ) {
         case 'left':
             if ( valid( -1 ) ) {
@@ -170,7 +170,11 @@ function keyPress( key ) {
             tick();
             break;
     }
-}
+
+    console.log("Respuesta para el servidor: " +JSON.stringify(resp));
+    console.log(request.body);
+    response.send(resp); // respondiendo al cliente 
+});
 
 // checks if the resulting position of current shape will be feasible
 function valid( offsetX, offsetY, newCurrent ) {
