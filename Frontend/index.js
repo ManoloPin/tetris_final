@@ -7,19 +7,6 @@ var app = express();
 app.use(express.json());
 app.use(cors());
 
-app.post('/calc', function(request, response){
-    
-    var req=request.body;
-    if(req.op==="sumar"){
-        var casio=new Calc(req.a, req.b);
-        var resp={respuesta:casio.sumar()};
-    }
-    
-    console.log("Respuesta para el cliente: "+JSON.stringify(resp));
-    console.log(request.body);      // El JSON que llegó
-    response.send(resp);    // respondiendo al cliente
-});
-
 //--------------------------- tetris-------------------------------------------
 var COLS = 10, ROWS = 20;
 var board = [];
@@ -40,6 +27,7 @@ var colors = [
 
 // creates a new 4x4 shape in global variable 'current'
 // 4x4 so as to cover the size when the shape is rotated
+
 function newShape() {
     var id = Math.floor( Math.random() * shapes.length );
     var shape = shapes[ id ]; // maintain id for color filling
@@ -64,6 +52,8 @@ function newShape() {
     currentX = 5;
     currentY = 0;
 }
+
+
 
 // clears the board
 function init() {
