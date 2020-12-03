@@ -3,23 +3,23 @@ var board = [];
 var lose;
 var interval;
 var intervalRender;
-var current; // forma actual en movimiento
-var currentX, currentY; // posición de la forma actual
-var freezed; // La forma actual está asentada en el tablero?
+var current; // current moving shape
+var currentX, currentY; // position of current shape
+var freezed; // is current shape settled on the board?
 var shapes = [
     [ 1, 1, 1, 0,
       1 ]
    
 ];
 var colors = [
-    'cyan'
+    'purple'
 ];
 
-// crea una nueva forma 4x4 en la variable global 'actual'
-// 4x4 para cubrir el tamaño cuando se gira la forma
+// creates a new 4x4 shape in global variable 'current'
+// 4x4 so as to cover the size when the shape is rotated
 function newShape() {
     var id = Math.floor( Math.random() * shapes.length );
-    var shape = shapes[ id ]; // mantener id para relleno de color
+    var shape = shapes[ id ]; // maintain id for color filling
 
     current = [];
     for ( var y = 0; y < 4; ++y ) {
@@ -35,14 +35,14 @@ function newShape() {
         }
     }
     
-    // nueva forma comienza a moverse
+    // new shape starts to move
     freezed = false;
-    // posición donde la forma aparece
+    // position where the shape will evolve
     currentX = 2;
     currentY = 0;
 }
 
-// limpia el tablero-------------------------------------------------------
+// clears the board
 function init() {
     for ( var y = 0; y < ROWS; ++y ) {
         board[ y ] = [];
@@ -52,12 +52,12 @@ function init() {
     }
 }
 
-// mantener el elemento moviéndose hacia abajo, creando nuevas formas y despejando líneas
+// keep the element moving down, creating new shapes and clearing lines
 function tick() {
     if ( valid( 0, 1 ) ) {
         ++currentY;
     }
-    // if el elemento llego al final ??
+    // if the element settled
     else {
         freeze();
         valid(0, 1);
@@ -70,7 +70,7 @@ function tick() {
     }
 }
 
-// detener la forma en su posición y fijarla a la tabla
+// stop shape at its position and fix it to board
 function freeze() {
     for ( var y = 0; y < 4; ++y ) {
         for ( var x = 0; x < 4; ++x ) {
@@ -82,7 +82,7 @@ function freeze() {
     freezed = true;
 }
 
-// detener la forma en su posición y fijarla
+// returns rotates the rotated shape 'current' perpendicularly anticlockwise
 function rotate( current ) {
     var newCurrent = [];
     for ( var y = 0; y < 4; ++y ) {
@@ -95,7 +95,7 @@ function rotate( current ) {
     return newCurrent;
 }
 
-// compruebe si alguna línea está llena y límpiela ----------------------------------------------------------------
+// check if any lines are filled and clear them
 function clearLines() {
     for ( var y = ROWS - 1; y >= 0; --y ) {
         var rowFilled = true;
@@ -106,7 +106,7 @@ function clearLines() {
             }
         }
         if ( rowFilled ) {
-            document.getElementById( 'clearsound' ).play();
+            //document.getElementById( 'clearsound' ).play(); // error 
             for ( var yy = y; yy > 0; --yy ) {
                 for ( var x = 0; x < COLS; ++x ) {
                     board[ yy ][ x ] = board[ yy - 1 ][ x ];
@@ -116,7 +116,7 @@ function clearLines() {
         }
     }
 }
-// lectura de movimientos ------------------------------------------------------------------
+
 function keyPress( key ) {
     switch ( key ) {
         case 'left':
@@ -149,7 +149,7 @@ function keyPress( key ) {
     }
 }
 
-// comprueba si la posición resultante de la forma actual será factible ---------------------------------
+// checks if the resulting position of current shape will be feasible
 function valid( offsetX, offsetY, newCurrent ) {
     offsetX = offsetX || 0;
     offsetY = offsetY || 0;
@@ -167,7 +167,7 @@ function valid( offsetX, offsetY, newCurrent ) {
                   || y + offsetY >= ROWS
                   || x + offsetX >= COLS ) {
                     if (offsetY == 1 && freezed) {
-                        lose = true; // perder si la forma actual se establece en la fila superior (toca el vorde superior)
+                        lose = true; // lose if the current shape is settled at the top most row
                         document.getElementById('playbutton').disabled = false;
                     } 
                     return false;
@@ -195,4 +195,57 @@ function newGame() {
 function clearAllIntervals(){
     clearInterval( interval );
     clearInterval( intervalRender );
+}
+
+//----------------------------------------------------------------
+document.body.onkeydown = function( e ) {
+    var keys = {
+        37: 'left',
+        39: 'right',
+        40: 'down',
+        38: 'rotate',
+        32: 'drop'
+    };
+    if ( typeof keys[ e.keyCode ] != 'undefined' ) {
+        keyPress( keys[ e.keyCode ] );
+        render();
+    }
+};
+
+//---------------------------------------------------------------------
+var canvas = document.getElementsByTagName( 'canvas' )[ 0 ];
+var ctx = canvas.getContext( '2d' );
+var W = 300, H = 600;
+var BLOCK_W = W / COLS, BLOCK_H = H / ROWS;
+
+// draw a single square at (x, y)
+function drawBlock( x, y ) {
+    ctx.fillRect( BLOCK_W * x, BLOCK_H * y, BLOCK_W - 1 , BLOCK_H - 1 );
+    ctx.strokeRect( BLOCK_W * x, BLOCK_H * y, BLOCK_W - 1 , BLOCK_H - 1 );
+}
+
+// draws the board and the moving shape
+function render() {
+    ctx.clearRect( 0, 0, W, H );
+
+    ctx.strokeStyle = 'black';
+    for ( var x = 0; x < COLS; ++x ) {
+        for ( var y = 0; y < ROWS; ++y ) {
+            if ( board[ y ][ x ] ) {
+                ctx.fillStyle = colors[ board[ y ][ x ] - 1 ];
+                drawBlock( x, y );
+            }
+        }
+    }
+
+    ctx.fillStyle = 'red';
+    ctx.strokeStyle = 'black';
+    for ( var y = 0; y < 4; ++y ) {
+        for ( var x = 0; x < 4; ++x ) {
+            if ( current[ y ][ x ] ) {
+                ctx.fillStyle = colors[ current[ y ][ x ] - 1 ];
+                drawBlock( currentX + x, currentY + y );
+            }
+        }
+    }
 }

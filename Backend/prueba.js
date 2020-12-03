@@ -6,11 +6,11 @@ const routes = require('./routes/index');
 
 // settings ------------------------------------------------------
 app.set('port', process.env.PORT || 80);
-app.set('views',path.join(process.cwd(), '../Frontend/views'));
+app.set('views',path.join(__dirname, '../Frontend/views'));
 app.set('view engine', 'ejs');
 
 //middleware -----------------------------------------------------
-app.use((req,sres,next) => {
+app.use((req,res,next) => {
     console.log(`${req.url} -${req.method}`);
     next();
 });
@@ -31,5 +31,5 @@ app.use(express.static(path.join(__dirname, 'controllers')));
 
 //start the server
 app.listen(app.get('port'),() =>{
-    console.log('server on port ', app.get('port'));
+    console.log('servidor iniciado en puerto:', app.get('port'));
 });
