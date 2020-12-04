@@ -1,11 +1,18 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
+const https = require('https');
 const app = express();
+
+const server = https.createServer({
+    key: fs.readFileSync(`${__dirname}/localhost-key.pem`, 'utf8'),
+    cert: fs.readFileSync(`${__dirname}/localhost.pem`, 'utf8')
+}, app);
 
 const routes = require('./routes/index');
 
 // settings ------------------------------------------------------
-app.set('port', process.env.PORT || 80);
+//app.set('port', process.env.PORT || 80);
 app.set('views',path.join(__dirname, '../Frontend/views'));
 app.set('view engine', 'ejs');
 
@@ -28,7 +35,7 @@ app.use(express.static(path.join(__dirname, 'controllers')));
 // -----------------tetris-----------------------------------------
 
 
-
+server.listen(443);
 //start the server
 app.listen(app.get('port'),() =>{
     console.log('servidor iniciado en puerto:', app.get('port'));
